@@ -3,6 +3,7 @@ include .ini
 include .rst
 include .txt
 include LICENSE
+include requirements.txt
 
 global-exclude pycache .py[cod]
 global-exclude .so *.dylib
