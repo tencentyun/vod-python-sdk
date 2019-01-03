@@ -21,6 +21,6 @@ setup(
     author_email='1654382995@qq.com',
     description='vod-python-sdk',
     long_description=long_description(),
-    packages=find_packages(),
+    packages=find_packages(exclude=["test*"]),
     install_requires=requirements()
 )
