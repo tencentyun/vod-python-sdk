@@ -54,7 +54,7 @@ class VodUploadClient:
                 cos_client,
                 request.MediaFilePath,
                 apply_upload_response.StorageBucket,
-                apply_upload_response.MediaStoragePath,
+                apply_upload_response.MediaStoragePath[1:],
                 request.ConcurrentUploadNumber
             )
         if StringUtil.is_not_empty(request.CoverType) \
@@ -63,7 +63,7 @@ class VodUploadClient:
                 cos_client,
                 request.CoverFilePath,
                 apply_upload_response.StorageBucket,
-                apply_upload_response.CoverStoragePath,
+                apply_upload_response.CoverStoragePath[1:],
                 request.ConcurrentUploadNumber
             )
 
