@@ -12,9 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 class VodUploadClient:
-    def __init__(self, secret_id, secret_key):
+    def __init__(self, secret_id, secret_key, token=None):
         self.secret_id = secret_id
         self.secret_key = secret_key
+        self.token = token
         self.ignore_check = False
         self.retry_time = 3
 
@@ -24,7 +25,7 @@ class VodUploadClient:
 
         request_str = request.to_json_string()
         logger.info("vod upload req = {}, region = {}".format(request_str, region))
-        cred = credential.Credential(self.secret_id, self.secret_key)
+        cred = credential.Credential(self.secret_id, self.secret_key, self.token)
         api_client = vod_client.VodClient(cred, region)
 
         apply_upload_request = models.ApplyUploadRequest()

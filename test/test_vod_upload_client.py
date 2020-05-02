@@ -11,6 +11,8 @@ from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentClo
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger(__name__)
 client = VodUploadClient("your secretId", "your secretKey")
+# set credential token if necessary
+# client = VodUploadClient("your secretId", "your secretKey", "your token")
 path = os.path.split(os.path.abspath(__file__))[0]
 
 
