@@ -10,7 +10,7 @@ from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentClo
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger(__name__)
-client = VodUploadClient("your secretId", "your secretKey")
+client = VodUploadClient("Your SecretId", "Your SecretKey")
 # set credential token if necessary
 # client = VodUploadClient("your secretId", "your secretKey", "your token")
 path = os.path.split(os.path.abspath(__file__))[0]
@@ -65,7 +65,7 @@ class TestVodUploadClient(unittest.TestCase):
         try:
             client.upload("ap-guangzhou", request)
         except TencentCloudSDKException as err:
-            self.assertEqual(err.message, "invalid video type")
+            self.assertEqual(err.message, "invalid media type")
 
     def test_invalid_cover_type(self):
         request = VodUploadRequest()
@@ -103,6 +103,18 @@ class TestVodUploadClient(unittest.TestCase):
         request = VodUploadRequest()
         request.MediaFilePath = os.path.join(path, "Wildlife.mp4")
         request.MediaName = "test_test"
+        response = client.upload("ap-guangzhou", request)
+        self.assertIsNotNone(response.FileId)
+
+    def test_upload_hls(self):
+        request = VodUploadRequest()
+        request.MediaFilePath = os.path.join(path, "hls", "prog_index.m3u8")
+        response = client.upload("ap-guangzhou", request)
+        self.assertIsNotNone(response.FileId)
+
+    def test_upload_hls_masterplaylist(self):
+        request = VodUploadRequest()
+        request.MediaFilePath = os.path.join(path, "hls", "bipbopall.m3u8")
         response = client.upload("ap-guangzhou", request)
         self.assertIsNotNone(response.FileId)
 

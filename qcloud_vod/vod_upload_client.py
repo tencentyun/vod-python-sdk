@@ -1,4 +1,5 @@
 import logging
+import os
 from .common import StringUtil, FileUtil
 from .exception import VodClientException
 from .model import VodUploadResponse
@@ -27,6 +28,11 @@ class VodUploadClient:
         logger.info("vod upload req = {}, region = {}".format(request_str, region))
         cred = credential.Credential(self.secret_id, self.secret_key, self.token)
         api_client = vod_client.VodClient(cred, region)
+
+        parsed_manifest_list = []
+        segment_file_path_list = []
+        if self._is_manifest_media_tpe(request.MediaType):
+            self.parse_manifest(api_client, request.MediaFilePath, request.MediaType, parsed_manifest_list, segment_file_path_list)
 
         apply_upload_request = models.ApplyUploadRequest()
         apply_upload_request.from_json_string(request_str)
@@ -67,6 +73,20 @@ class VodUploadClient:
                 apply_upload_response.CoverStoragePath[1:],
                 request.ConcurrentUploadNumber
             )
+
+        if len(segment_file_path_list) > 0:
+            for segment_file_path in segment_file_path_list:
+                storage_dir = os.path.dirname(apply_upload_response.MediaStoragePath)
+                media_file_dir = os.path.dirname(request.MediaFilePath)
+                segment_relative_file_path = segment_file_path[len(media_file_dir):].replace("\\", "/")
+                segment_storage_path = FileUtil.join_path(storage_dir, segment_relative_file_path)
+                self.upload_cos(
+                    cos_client,
+                    segment_file_path,
+                    apply_upload_response.StorageBucket,
+                    segment_storage_path[1:],
+                    request.ConcurrentUploadNumber
+                )
 
         commit_upload_request = models.CommitUploadRequest()
         commit_upload_request.VodSessionKey = apply_upload_response.VodSessionKey
@@ -122,6 +142,47 @@ class VodUploadClient:
                     continue
                 raise err
         raise err_info
+
+    def parse_Streaming_manifest(self, api_client, request):
+        err_info = None
+        for i in range(self.retry_time):
+            try:
+                response = api_client.ParseStreamingManifest(request)
+                return response
+            except TencentCloudSDKException as err:
+                if StringUtil.is_empty(err.get_request_id()):
+                    err_info = err
+                    continue
+                raise err
+        raise err_info
+
+    def parse_manifest(self, api_client, manifest_file_path, manifest_media_type, parsed_manifest_list, segment_file_path_list):
+        if manifest_file_path in parsed_manifest_list:
+            return
+        parsed_manifest_list.append(manifest_file_path)
+
+        file = open(manifest_file_path)
+        content = file.read()
+        file.close()
+
+        parse_streaming_manifest_request = models.ParseStreamingManifestRequest()
+        parse_streaming_manifest_request.ManifestType = manifest_media_type
+        parse_streaming_manifest_request.MediaManifestContent = content
+        parse_streaming_manifest_response = self.parse_Streaming_manifest(api_client, parse_streaming_manifest_request)
+
+        if len(parse_streaming_manifest_response.MediaSegmentSet) > 0:
+            for segment in parse_streaming_manifest_response.MediaSegmentSet:
+                media_type = FileUtil.get_file_type(segment)
+                media_file_path = FileUtil.join_path(os.path.dirname(manifest_file_path), segment)
+                if not FileUtil.is_file_exist(media_file_path):
+                    raise VodClientException(media_file_path)
+                segment_file_path_list.append(media_file_path)
+                if self._is_manifest_media_tpe(media_type):
+                    self.parse_manifest(api_client, media_file_path, media_type, parsed_manifest_list, segment_file_path_list)
+
+    @staticmethod
+    def _is_manifest_media_tpe(media_type):
+        return media_type == "m3u8" or media_type == "mpd"
 
     @staticmethod
     def _prefix_check_and_set_default_val(region, request):
