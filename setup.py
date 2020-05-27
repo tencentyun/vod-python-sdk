@@ -14,7 +14,7 @@ def long_description():
 
 setup(
     name='vod-python-sdk',
-    version='1.4.2',
+    version='1.4.3',
     url='https://github.com/tencentyun/vod-python-sdk',
     license='MIT',
     author='vod',
