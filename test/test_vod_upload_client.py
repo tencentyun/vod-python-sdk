@@ -1,3 +1,4 @@
+from distutils.command.upload import upload
 from qcloud_vod.vod_upload_client import VodUploadClient
 from qcloud_vod.model import VodUploadRequest
 from qcloud_vod.exception import VodClientException
@@ -85,6 +86,13 @@ class TestVodUploadClient(unittest.TestCase):
         response = client.upload("ap-guangzhou", request)
         self.assertIsNotNone(response.FileId)
 
+    def test_upload_with_progress_callback(self):
+        request = VodUploadRequest()
+        request.MediaFilePath = os.path.join(path, "Wildlife.mp4")
+        request.CoverFilePath = os.path.join(path, "Wildlife-Cover.png")
+        response = client.upload("ap-guangzhou", request, upload_percentage)
+        self.assertIsNotNone(response.FileId)
+
     def test_upload_with_procedure(self):
         request = VodUploadRequest()
         request.MediaFilePath = os.path.join(path, "Wildlife.mp4")
@@ -117,6 +125,18 @@ class TestVodUploadClient(unittest.TestCase):
         request.MediaFilePath = os.path.join(path, "hls", "bipbopall.m3u8")
         response = client.upload("ap-guangzhou", request)
         self.assertIsNotNone(response.FileId)
+
+
+def upload_percentage(consumed_bytes, total_bytes):
+    """进度条回调函数，计算当前上传的百分比
+
+    :param consumed_bytes: 已经上传的数据量
+    :param total_bytes: 总数据量
+    """
+    if total_bytes:
+        rate = int(100 * (float(consumed_bytes) / float(total_bytes)))
+        print('\ruploaded {0} bytes, percent {1}% '.format(consumed_bytes, rate))
+        sys.stdout.flush()
 
 
 if __name__ == '__main__':

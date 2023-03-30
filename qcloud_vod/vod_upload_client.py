@@ -20,7 +20,7 @@ class VodUploadClient:
         self.ignore_check = False
         self.retry_time = 3
 
-    def upload(self, region, request):
+    def upload(self, region, request, progress_callback=None):
         if not self.ignore_check:
             self._prefix_check_and_set_default_val(region, request)
 
@@ -62,7 +62,8 @@ class VodUploadClient:
                 request.MediaFilePath,
                 apply_upload_response.StorageBucket,
                 apply_upload_response.MediaStoragePath[1:],
-                request.ConcurrentUploadNumber
+                request.ConcurrentUploadNumber,
+                progress_callback
             )
         if StringUtil.is_not_empty(request.CoverType) \
                 and StringUtil.is_not_empty(apply_upload_response.CoverStoragePath):
@@ -71,7 +72,8 @@ class VodUploadClient:
                 request.CoverFilePath,
                 apply_upload_response.StorageBucket,
                 apply_upload_response.CoverStoragePath[1:],
-                request.ConcurrentUploadNumber
+                request.ConcurrentUploadNumber,
+                progress_callback
             )
 
         if len(segment_file_path_list) > 0:
@@ -85,7 +87,8 @@ class VodUploadClient:
                     segment_file_path,
                     apply_upload_response.StorageBucket,
                     segment_storage_path[1:],
-                    request.ConcurrentUploadNumber
+                    request.ConcurrentUploadNumber,
+                    progress_callback
                 )
 
         commit_upload_request = models.CommitUploadRequest()
@@ -102,19 +105,21 @@ class VodUploadClient:
         return response
 
     @staticmethod
-    def upload_cos(cos_client, local_path, bucket, cos_path, max_thread):
+    def upload_cos(cos_client, local_path, bucket, cos_path, max_thread, progress_callback):
         if max_thread is None:
             cos_client.upload_file(
                 Bucket=bucket,
                 LocalFilePath=local_path,
-                Key=cos_path
+                Key=cos_path,
+                progress_callback=progress_callback
             )
         else:
             cos_client.upload_file(
                 Bucket=bucket,
                 LocalFilePath=local_path,
                 Key=cos_path,
-                MAXThread=max_thread
+                MAXThread=max_thread,
+                progress_callback=progress_callback
             )
 
     def apply_upload(self, api_client, request):
