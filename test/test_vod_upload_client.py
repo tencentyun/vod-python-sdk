@@ -1,4 +1,4 @@
-from distutils.command.upload import upload
+from xml.etree.ElementTree import QName
 from qcloud_vod.vod_upload_client import VodUploadClient
 from qcloud_vod.model import VodUploadRequest
 from qcloud_vod.exception import VodClientException
@@ -86,7 +86,7 @@ class TestVodUploadClient(unittest.TestCase):
         response = client.upload("ap-guangzhou", request)
         self.assertIsNotNone(response.FileId)
 
-    def test_upload_with_progress_callback(self):
+    def test_upload_with_progress_callback(self): # Qn: COS接口对20M以上的文件分片上传，只有分片上传才支持progress callback
         request = VodUploadRequest()
         request.MediaFilePath = os.path.join(path, "Wildlife.mp4")
         request.CoverFilePath = os.path.join(path, "Wildlife-Cover.png")
