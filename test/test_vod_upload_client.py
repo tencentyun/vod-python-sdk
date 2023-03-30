@@ -85,7 +85,9 @@ class TestVodUploadClient(unittest.TestCase):
         response = client.upload("ap-guangzhou", request)
         self.assertIsNotNone(response.FileId)
 
-    def test_upload_with_progress_callback(self): # Qn: COS接口对20M以上的文件分片上传，只有分片上传才支持progress callback
+    def test_upload_with_progress_callback(self):      
+        """仅支持对 20M 以上的文件回调上传进度
+        """
         request = VodUploadRequest()
         request.MediaFilePath = os.path.join(path, "Wildlife.mp4")
         request.CoverFilePath = os.path.join(path, "Wildlife-Cover.png")
@@ -127,7 +129,7 @@ class TestVodUploadClient(unittest.TestCase):
 
 
 def upload_percentage(consumed_bytes, total_bytes):
-    """进度条回调函数，计算当前上传的百分比
+    """默认上传进度回调函数，计算当前上传的百分比
 
     :param consumed_bytes: 已经上传的数据量
     :param total_bytes: 总数据量
