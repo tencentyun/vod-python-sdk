@@ -1,4 +1,3 @@
-from xml.etree.ElementTree import QName
 from qcloud_vod.vod_upload_client import VodUploadClient
 from qcloud_vod.model import VodUploadRequest
 from qcloud_vod.exception import VodClientException
