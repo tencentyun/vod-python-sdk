@@ -86,8 +86,6 @@ class TestVodUploadClient(unittest.TestCase):
         self.assertIsNotNone(response.FileId)
 
     def test_upload_with_progress_callback(self):      
-        """仅支持对 20M 以上的文件回调上传进度
-        """
         request = VodUploadRequest()
         request.MediaFilePath = os.path.join(path, "Wildlife.mp4")
         request.CoverFilePath = os.path.join(path, "Wildlife-Cover.png")
