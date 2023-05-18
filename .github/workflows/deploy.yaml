@@ -1,17 +1,13 @@
 name: Deploy
 
 on:
-  push:
-    branches:
-      - master
   release:
     types:
       - published
 
 jobs:
   build:
-    if: github.repository == 'ringsaturn/cnholiday'
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
