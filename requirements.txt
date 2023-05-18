@@ -1,2 +1,2 @@
-cos-python-sdk-v5
+cos-python-sdk-v5>=1.9.24
 tencentcloud-sdk-python
